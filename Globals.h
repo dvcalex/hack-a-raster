@@ -2,7 +2,7 @@
 
 //#define MY_DEBUG
 //#define PROFILE_DELTATIME
-#define PROFILE_FPS
+//#define PROFILE_FPS
 
 constexpr int WINDOW_WIDTH{ 640 };
 constexpr int WINDOW_HEIGHT{ 480 };

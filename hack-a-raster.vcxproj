@@ -130,6 +130,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Color.h" />
+    <ClInclude Include="Cow.h" />
     <ClInclude Include="Cube.h" />
     <ClInclude Include="DrawCommand.h" />
     <ClInclude Include="Globals.h" />
