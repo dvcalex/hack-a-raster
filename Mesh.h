@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Types.h"
+#include "VertexAttribute.h"
 
 namespace Rasterizer
 {
@@ -10,8 +11,8 @@ namespace Rasterizer
 
     struct Mesh
     {
-        Vector3f const* vertexBuffer = nullptr;
+        Attribute<Vector3f> vertices = {};
+        Attribute<Vector4f> colors = {};
         std::uint32_t vertexCount = 0;
-        Vector4f color = { 1.f, 1.f, 1.f, 1.f };
     };
 }

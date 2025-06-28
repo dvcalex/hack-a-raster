@@ -50,6 +50,9 @@
     <ClCompile Include="ColorBuffer.h">
       <Filter>Header Files</Filter>
     </ClCompile>
+    <ClCompile Include="VertexAttribute.h">
+      <Filter>Header Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md">

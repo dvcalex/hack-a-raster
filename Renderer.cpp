@@ -21,9 +21,14 @@ namespace Rasterizer
         {
             // Vertices are group adjacently in threes to make up a triangle.
             // Get all three points in the triangle as homogenous coordinates.
-            auto v0 = command.transform * Types::AsPoint(command.mesh.vertexBuffer[vIdx + 0]);
-            auto v1 = command.transform * Types::AsPoint(command.mesh.vertexBuffer[vIdx + 1]);
-            auto v2 = command.transform * Types::AsPoint(command.mesh.vertexBuffer[vIdx + 2]);
+            auto v0 = command.transform * Types::AsPoint(command.mesh.vertices[vIdx + 0]);
+            auto v1 = command.transform * Types::AsPoint(command.mesh.vertices[vIdx + 1]);
+            auto v2 = command.transform * Types::AsPoint(command.mesh.vertices[vIdx + 2]);
+
+            // Color vertex attributes
+            auto c0 = command.mesh.colors[vIdx + 0];
+            auto c1 = command.mesh.colors[vIdx + 1];
+            auto c2 = command.mesh.colors[vIdx + 2];
 
             // Get determinate of [ v0v1 v0v2 ]
             float det012 = Det2D(v1 - v0, v2 - v0);
@@ -86,9 +91,17 @@ namespace Rasterizer
                     float det12p = Det2D(v2 - v1, p - v1);
                     float det20p = Det2D(v0 - v2, p - v2);
 
-                    // If sample point p is to the left of each side, color that pixel.
+                    // If sample point p is to the left of each side, color that pixel.                        
                     if (det01p >= 0.f && det12p >= 0.f && det20p >= 0.f)
-                        colorBuffer.ColorAt(x, y) = ToColor4UB(command.mesh.color);
+                    {
+                        // Calculate barycentric coordinates
+                        float l0 = det12p / det012;
+                        float l1 = det20p / det012;
+                        float l2 = det01p / det012;
+
+                        colorBuffer.ColorAt(x, y) = Types::ToColor4UB(l0 * c0 + l1 * c1 + l2 * c2);
+                    }
+
                 }
             }
         }

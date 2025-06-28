@@ -63,6 +63,21 @@ namespace Rasterizer
             return { v0.x - v1.x, v0.y - v1.y, v0.z - v1.z, v0.w - v1.w };
         }
 
+        inline Vector4f operator+(const Vector4f& v0, const Vector4f& v1)
+        {
+            return { v0.x + v1.x, v0.y + v1.y, v0.z + v1.z, v0.w + v1.w };
+        }
+
+        inline Vector4f operator*(const Vector4f& v, float t)
+        {
+            return { v.x * t, v.y * t, v.z * t, v.w * t };
+        }
+
+        inline Vector4f operator*(float t, const Vector4f& v)
+        {
+            return v * t;
+        }
+
         // gives the determinate of matrix [ v0.xy v1.xy ] (in xy plane)
         inline float Det2D(const Vector4f& v0, const Vector4f& v1)
         {

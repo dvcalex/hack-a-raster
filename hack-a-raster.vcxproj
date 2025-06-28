@@ -142,6 +142,7 @@
     <ClCompile Include="debug.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Renderer.cpp" />
+    <ClCompile Include="VertexAttribute.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />

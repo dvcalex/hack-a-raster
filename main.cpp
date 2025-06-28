@@ -13,6 +13,7 @@
 #ifndef MY_DEBUG
 
 #include"Renderer.h"
+#include"VertexAttribute.h"
 
 #define SDL_MAIN_USE_CALLBACKS 1  /* use the callbacks instead of main() */
 #include <SDL3/SDL.h>
@@ -123,30 +124,31 @@ SDL_AppResult SDL_AppIterate(void* appstate)
 		{0.f, 100.f, 0.f},
 	};
 
+	Vector4f colors[]
+	{
+		{1.f, 0.f, 0.f, 1.f},
+		{0.f, 1.f, 0.f, 1.f},
+		{0.f, 0.f, 1.f, 1.f},
+	};
+
 	for (int i = 0; i < 100; ++i)
 	{
-		Rasterizer::DrawCommand drawCommand
+		// Mesh initialization
+		Rasterizer::Mesh mesh{};
+		mesh.colors.pointer = colors;
+		mesh.vertices.pointer = basicTriangle;
+		mesh.vertexCount = 3;
+
+		// DrawCommand initialization
+		Rasterizer::DrawCommand drawCommand{};
+		drawCommand.mesh = mesh;
+		drawCommand.cullMode = Rasterizer::CullMode::None;
+		drawCommand.transform = 
 		{
-			// Mesh
-			{
-				basicTriangle,				// Vertex buffer
-				3,						// Vertex count
-				{(i % 3) == 0, (i % 3) == 1, (i % 3) == 2, 1.f},	// Mesh color
-			},
-			// Cull mode
-			{
-				Rasterizer::CullMode::None
-			},
-			// Transform (defined by a Matrix4x4f)
-			{
-				// Matrix4x4f
-				{
-					1.f, 0.f, 0.f, mouse_x + 100.f * (i % 10),
-					0.f, 1.f, 0.f, mouse_y + 100.f * (i / 10),
-					0.f, 0.f, 1.f, 0.f,
-					0.f, 0.f, 0.f, 1.f,
-				}
-			}
+			1.f, 0.f, 0.f, mouse_x + 100.f * (i % 10),
+			0.f, 1.f, 0.f, mouse_y + 100.f * (i / 10),
+			0.f, 0.f, 1.f, 0.f,
+			0.f, 0.f, 0.f, 1.f,
 		};
 
 		Rasterizer::Draw(colorBuffer, drawCommand);
