@@ -31,6 +31,8 @@
 using myClock = std::chrono::high_resolution_clock;
 using Rasterizer::ImageView;
 
+static bool doRender{ false };
+
 /* We will use this renderer to draw into this window every frame. */
 static SDL_Window* window = nullptr;
 static SDL_Renderer* renderer = nullptr;
@@ -45,7 +47,7 @@ static float elapsedTime{ 0 };
 /* This function runs once at startup. */
 SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
 {
-	SDL_SetAppMetadata("From Scratch CPU Rasterizer", "1.0", "com.hack.from-scratch-cpu-rasterizer");
+	SDL_SetAppMetadata("hack-a-raster", "1.0", "com.hack.raster");
 
 	if (!SDL_Init(SDL_INIT_VIDEO))
 	{
@@ -89,6 +91,14 @@ SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event)
 		mouse_x = event->motion.x;
 		mouse_y = event->motion.y;
 		break;
+	case SDL_EVENT_MOUSE_BUTTON_DOWN:
+		//std::cout << "mouse down" << std::endl;
+		doRender = true;
+		break;
+	case SDL_EVENT_MOUSE_BUTTON_UP:
+		//std::cout << "mouse up" << std::endl;
+		doRender = false;
+		break;
 	}
 
 
@@ -98,8 +108,16 @@ SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event)
 /* This function runs once per frame, and is the heart of the program. */
 SDL_AppResult SDL_AppIterate(void* appstate)
 {
-	// Handle frame rate count
+	// track time
 	auto thisTick{ myClock::now() };
+
+	if (!doRender)
+	{
+		lastTick = thisTick;
+		return SDL_APP_CONTINUE; // Carry on with the program.
+	}
+
+	// Handle frame rate count
 	float dt{ std::chrono::duration_cast<std::chrono::duration<float>>(
 		thisTick - lastTick).count() };
 	lastTick = thisTick;
@@ -181,7 +199,7 @@ SDL_AppResult SDL_AppIterate(void* appstate)
 		Rasterizer::Matrix4x4f::Translate({ 0.f, 0.f, -5.f })
 	};
 
-	for (int i = -2; i <= 2; ++i)
+	for (int i = 0; i <= 0; ++i)
 	{
 		// DrawCommand initialization
 		Rasterizer::DrawCommand drawCommand{};

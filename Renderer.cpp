@@ -172,7 +172,6 @@ namespace Rasterizer
 		}
 	}
 
-
 	// Sets each element in 'colorBuffer' to 'color' as a Color4UB.  
 	void Clear(const ImageView<Color4UB>& colorBuffer, const Vector4f& color)
 	{
