@@ -134,20 +134,28 @@
     <ClInclude Include="Cube.h" />
     <ClInclude Include="DrawCommand.h" />
     <ClInclude Include="Globals.h" />
+    <ClInclude Include="Hand.h" />
     <ClInclude Include="Image.h" />
     <ClInclude Include="Matrix.h" />
     <ClInclude Include="Mesh.h" />
+    <ClInclude Include="Pyramid.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="Settings.h" />
+    <ClInclude Include="SuperRealisticCow.h" />
     <ClInclude Include="Viewport.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Cow.cpp" />
     <ClCompile Include="Framebuffer.h" />
+    <ClCompile Include="Hand.cpp" />
     <ClCompile Include="ImageView.h" />
     <ClCompile Include="Cube.cpp" />
     <ClCompile Include="debug.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="OBJLoader.h" />
+    <ClCompile Include="Pyramid.cpp" />
     <ClCompile Include="Renderer.cpp" />
+    <ClCompile Include="SuperRealisticCow.cpp" />
     <ClCompile Include="Vector.h" />
     <ClCompile Include="VertexAttribute.h" />
   </ItemGroup>

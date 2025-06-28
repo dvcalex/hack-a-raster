@@ -19,6 +19,10 @@
 #include"Framebuffer.h"
 #include"Image.h"
 #include"Cube.h"
+#include"Pyramid.h"
+#include"Cow.h"
+#include"Hand.h"
+#include"SuperRealisticCow.h"
 
 #define SDL_MAIN_USE_CALLBACKS 1  /* use the callbacks instead of main() */
 #include <SDL3/SDL.h>
@@ -54,7 +58,7 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
 		SDL_Log("Couldn't initialize SDL: %s", SDL_GetError());
 		return SDL_APP_FAILURE;
 	}
-	if (!SDL_CreateWindowAndRenderer("From Scratch CPU Rasterizer", WINDOW_WIDTH, WINDOW_HEIGHT, 0 /* | SDL_WINDOW_RESIZABLE */, &window, &renderer)) \
+	if (!SDL_CreateWindowAndRenderer("From Scratch CPU Rasterizer", WINDOW_WIDTH, WINDOW_HEIGHT, 0, &window, &renderer))
 	{
 		SDL_Log("Couldn't create window/renderer: %s", SDL_GetError());
 		return SDL_APP_FAILURE;
@@ -200,8 +204,8 @@ SDL_AppResult SDL_AppIterate(void* appstate)
 	{
 		// DrawCommand initialization
 		Rasterizer::DrawCommand drawCommand{};
-		drawCommand.mesh = Rasterizer::cube;
-		drawCommand.cullMode = Rasterizer::CullMode::Clockwise; // front-face culling
+		drawCommand.mesh = Rasterizer::superRealisticCow;
+		drawCommand.cullMode = Rasterizer::CullMode::None; // front-face culling
 		drawCommand.depth.mode = Rasterizer::DepthTestMode::Less;
 		drawCommand.transform = projection
 			* view

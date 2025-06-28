@@ -4,5 +4,5 @@
 
 namespace Rasterizer
 {
-	extern const Mesh cow;
+	extern const Mesh hand;
 }
