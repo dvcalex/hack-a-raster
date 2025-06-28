@@ -12,7 +12,9 @@ namespace Rasterizer
         std::fill_n(colorBuffer.pixels, WINDOW_WIDTH * WINDOW_HEIGHT, ToColor4UB(color));
     }  
 
-    void Draw(const ColorBuffer& colorBuffer, const DrawCommand& command)
+    void Draw(const ColorBuffer& colorBuffer, 
+        const Viewport& viewport, 
+        const DrawCommand& command)
     {
         // For each triangle (set of 3 vertices) in vertex buffer
         for (std::uint32_t vIdx = 0;
@@ -21,9 +23,13 @@ namespace Rasterizer
         {
             // Vertices are group adjacently in threes to make up a triangle.
             // Get all three points in the triangle as homogenous coordinates.
-            auto v0 = command.transform * Types::AsPoint(command.mesh.vertices[vIdx + 0]);
-            auto v1 = command.transform * Types::AsPoint(command.mesh.vertices[vIdx + 1]);
-            auto v2 = command.transform * Types::AsPoint(command.mesh.vertices[vIdx + 2]);
+            auto v0 = command.transform * AsPoint(command.mesh.vertices[vIdx + 0]);
+            auto v1 = command.transform * AsPoint(command.mesh.vertices[vIdx + 1]);
+            auto v2 = command.transform * AsPoint(command.mesh.vertices[vIdx + 2]);
+
+            v0 = Apply(viewport, v0);
+            v1 = Apply(viewport, v1);
+            v2 = Apply(viewport, v2);
 
             // Color vertex attributes
             auto c0 = command.mesh.colors[vIdx + 0];
@@ -57,17 +63,17 @@ namespace Rasterizer
                 det012 = -det012;
             }
 
-            // Get the bounding box of this triangle (so we don't traverse redundant pixel coordinates)
-            std::int32_t xmin = std::min({ std::floor(v0.x), std::floor(v1.x), std::floor(v2.x) });
-            std::int32_t xmax = std::max({ std::floor(v0.x), std::floor(v1.x), std::floor(v2.x) });
-            std::int32_t ymin = std::min({ std::floor(v0.y), std::floor(v1.y), std::floor(v2.y) });
-            std::int32_t ymax = std::max({ std::floor(v0.y), std::floor(v1.y), std::floor(v2.y) });
+            // Get the bounding box of the triangle (so we don't operate on redundant pixel coordinates)
+            std::int32_t xmin = std::max<std::int32_t>(viewport.xmin, 0);
+            std::int32_t xmax = std::min<std::int32_t>(viewport.xmax, WINDOW_WIDTH) - 1;
+            std::int32_t ymin = std::max<std::int32_t>(viewport.ymin, 0);
+            std::int32_t ymax = std::min<std::int32_t>(viewport.ymax, WINDOW_HEIGHT) - 1;
 
             // Restrict bounding box to be inside of our canvas space
-            xmin = std::max<std::int32_t>(0, xmin);
-            xmax = std::min<std::int32_t>(WINDOW_WIDTH - 1, xmax);
-            ymin = std::max<std::int32_t>(0, ymin);
-            ymax = std::min<std::int32_t>(WINDOW_HEIGHT - 1, ymax);
+            xmin = std::max<float>(xmin, std::min({ std::floor(v0.x), std::floor(v1.x), std::floor(v2.x) }));
+            xmax = std::min<float>(xmax, std::max({ std::floor(v0.x), std::floor(v1.x), std::floor(v2.x) }));
+            ymin = std::max<float>(ymin, std::min({ std::floor(v0.y), std::floor(v1.y), std::floor(v2.y) }));
+            ymax = std::min<float>(ymax, std::max({ std::floor(v0.y), std::floor(v1.y), std::floor(v2.y) }));
 
             // For each pixel coordinate in our bounding box
             for (std::int32_t y = ymin; y <= ymax; ++y)

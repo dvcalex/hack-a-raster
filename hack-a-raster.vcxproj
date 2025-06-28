@@ -136,6 +136,7 @@
     <ClInclude Include="Settings.h" />
     <ClInclude Include="Types.h" />
     <ClInclude Include="Vec3.h" />
+    <ClInclude Include="Viewport.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ColorBuffer.h" />

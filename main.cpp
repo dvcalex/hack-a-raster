@@ -110,18 +110,26 @@ SDL_AppResult SDL_AppIterate(void* appstate)
 	// Get pointer to pixels (our buffer)
 	ColorBuffer colorBuffer{ (Color4UB*)drawSurface->pixels };
 
+	// Setup our viewport
+	Rasterizer::Viewport viewport
+	{
+		0,
+		0,
+		(std::int32_t)WINDOW_WIDTH,
+		(std::int32_t)WINDOW_HEIGHT,
+	};
+
 	// Clear and set a color
 	Rasterizer::Clear(colorBuffer, { 0.8f, 0.9f, 1.f, 1.f });
 
-
 	// Do rendering...
 
-	// Basic triangle
-	Vector3f basicTriangle[]
+	// Postions of vertices in NDC (Normalized Device Coordinates)
+	Vector3f positions[]
 	{
-		{0.f, 0.f, 0.f},
-		{100.f, 0.f, 0.f},
-		{0.f, 100.f, 0.f},
+		{ 0.f,   0.5f, 0.f},
+		{-0.5f, -0.5f, 0.f},
+		{ 0.5f, -0.5f, 0.f},
 	};
 
 	Vector4f colors[]
@@ -136,22 +144,15 @@ SDL_AppResult SDL_AppIterate(void* appstate)
 		// Mesh initialization
 		Rasterizer::Mesh mesh{};
 		mesh.colors.pointer = colors;
-		mesh.vertices.pointer = basicTriangle;
+		mesh.vertices.pointer = positions;
 		mesh.vertexCount = 3;
 
 		// DrawCommand initialization
 		Rasterizer::DrawCommand drawCommand{};
 		drawCommand.mesh = mesh;
 		drawCommand.cullMode = Rasterizer::CullMode::None;
-		drawCommand.transform = 
-		{
-			1.f, 0.f, 0.f, mouse_x + 100.f * (i % 10),
-			0.f, 1.f, 0.f, mouse_y + 100.f * (i / 10),
-			0.f, 0.f, 1.f, 0.f,
-			0.f, 0.f, 0.f, 1.f,
-		};
 
-		Rasterizer::Draw(colorBuffer, drawCommand);
+		Rasterizer::Draw(colorBuffer, viewport, drawCommand);
 	}
 
 	// Write to the window's surface (screen)
