@@ -50,11 +50,13 @@ namespace Rasterizer
         return v0.x * v1.y - v0.y * v1.x;
     }
 
+    // divides vertex by inverse of w (1/W) (this is common in graphics APIs)
     inline Vector4f PerspectiveDivide(Vector4f v)
     {
-        v.x /= v.w;
-        v.y /= v.w;
-        v.z /= v.w;
+        v.w = 1.f / v.w;
+        v.x *= v.w;
+        v.y *= v.w;
+        v.z *= v.w;
         return v;
     }
 

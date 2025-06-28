@@ -133,6 +133,7 @@
     <ClInclude Include="Cube.h" />
     <ClInclude Include="DrawCommand.h" />
     <ClInclude Include="Globals.h" />
+    <ClInclude Include="Image.h" />
     <ClInclude Include="Matrix.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Renderer.h" />
@@ -140,7 +141,8 @@
     <ClInclude Include="Viewport.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="ColorBuffer.h" />
+    <ClCompile Include="Framebuffer.h" />
+    <ClCompile Include="ImageView.h" />
     <ClCompile Include="Cube.cpp" />
     <ClCompile Include="debug.cpp" />
     <ClCompile Include="main.cpp" />

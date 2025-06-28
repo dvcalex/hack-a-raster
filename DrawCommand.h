@@ -9,7 +9,8 @@ namespace Rasterizer
 	struct DrawCommand
 	{
 		Mesh mesh;
-		CullMode cullMode = CullMode::None;
-		Matrix4x4f transform = Matrix4x4f::Identity();
+		CullMode cullMode{ CullMode::None };
+		DepthSettings depth{};
+		Matrix4x4f transform{ Matrix4x4f::Identity() };
 	};
 }

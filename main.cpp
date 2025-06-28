@@ -16,6 +16,8 @@
 
 #include"Renderer.h"
 #include"VertexAttribute.h"
+#include"Framebuffer.h"
+#include"Image.h"
 #include"Cube.h"
 
 #define SDL_MAIN_USE_CALLBACKS 1  /* use the callbacks instead of main() */
@@ -27,7 +29,7 @@
 #include <math.h>
 
 using myClock = std::chrono::high_resolution_clock;
-using Rasterizer::ColorBuffer;
+using Rasterizer::ImageView;
 
 /* We will use this renderer to draw into this window every frame. */
 static SDL_Window* window = nullptr;
@@ -109,9 +111,23 @@ SDL_AppResult SDL_AppIterate(void* appstate)
 #endif
 	elapsedTime += dt;
 
+	// Initialize depthbuffer to garbage (i think?)
+	Rasterizer::Image<std::uint32_t> depthbuffer
+	{
+		Rasterizer::Image<std::uint32_t>::Allocate()
+	};
 
-	// Get pointer to pixels (our buffer)
-	ColorBuffer colorBuffer{ (Rasterizer::Color4UB*)drawSurface->pixels };
+	// Initialize colorbuffer from SDL draw surface pixels
+	Rasterizer::Color4UB* colorbuffer = (Rasterizer::Color4UB*)drawSurface->pixels;
+
+	// Initialize framebuffer from color and depth buffers
+	Rasterizer::Framebuffer framebuffer{};
+	framebuffer.color.pixels = colorbuffer;
+	framebuffer.depth = depthbuffer.View();
+
+	// Clear and set a color
+	Rasterizer::Clear(framebuffer.color, { 0.8f, 0.9f, 1.f, 1.f });
+	Rasterizer::Clear(framebuffer.depth, -1);
 
 	// Setup our viewport
 	Rasterizer::Viewport viewport
@@ -122,24 +138,21 @@ SDL_AppResult SDL_AppIterate(void* appstate)
 		(std::int32_t)WINDOW_HEIGHT,
 	};
 
-	// Clear and set a color
-	Rasterizer::Clear(colorBuffer, { 0.8f, 0.9f, 1.f, 1.f });
-
 	// Postions of vertices in NDC (Normalized Device Coordinates)
 	Rasterizer::Vector3f positions[]
 	{
-		{-0.5f, -0.5f, 0.f},
-		{-0.5f,  0.5f, 0.f},
-		{ 0.5f, -0.5f, 0.f},
-		{ 0.5f,  0.5f, 0.f},
+		{-1.f, -1.f, 0.f},
+		{ 1.f, -1.f, 0.f},
+		{-1.f,  1.f, 0.f},
+		{ 1.f,  1.f, 0.f},
 	};
 
 	Rasterizer::Vector4f colors[]
 	{
-		{1.f, 0.f, 0.f},
-		{0.f, 1.f, 0.f},
-		{0.f, 0.f, 1.f},
-		{1.f, 1.f, 1.f},
+		{0.f, 0.f, 0.f, 1.f},
+		{1.f, 0.f, 0.f, 1.f},
+		{0.f, 1.f, 0.f, 1.f},
+		{1.f, 1.f, 0.f, 1.f},
 	};
 
 	std::uint32_t indices[]
@@ -151,7 +164,7 @@ SDL_AppResult SDL_AppIterate(void* appstate)
 	// Model transformation matrix
 	Rasterizer::Matrix4x4f model
 	{
-		Rasterizer::Matrix4x4f::Translate({0.f, 0.f, -4.f})
+		Rasterizer::Matrix4x4f::Scale(1.f)
 		* Rasterizer::Matrix4x4f::RotateZX(elapsedTime)
 		* Rasterizer::Matrix4x4f::RotateXY(elapsedTime * 1.61f)
 	};
@@ -159,18 +172,30 @@ SDL_AppResult SDL_AppIterate(void* appstate)
 	// Projection transformation matrix
 	Rasterizer::Matrix4x4f projection
 	{
-		Rasterizer::Matrix4x4f::Perspective(4.f, 10.f, M_PI / 3.f, WINDOW_WIDTH * 1.f / WINDOW_HEIGHT)
+		Rasterizer::Matrix4x4f::Perspective(3.0f, 10.f, M_PI / 3.f, WINDOW_WIDTH * 1.f / WINDOW_HEIGHT)
 	};
 
-	// DrawCommand initialization
-	Rasterizer::DrawCommand drawCommand{};
-	drawCommand.mesh = Rasterizer::cube;
-	drawCommand.cullMode = Rasterizer::CullMode::CounterClockwise; // front-face culling
-	drawCommand.transform = projection * model;
+	// View transformation matrix
+	Rasterizer::Matrix4x4f view
+	{
+		Rasterizer::Matrix4x4f::Translate({ 0.f, 0.f, -5.f })
+	};
 
-	Rasterizer::Draw(colorBuffer, viewport, drawCommand);
+	for (int i = -2; i <= 2; ++i)
+	{
+		// DrawCommand initialization
+		Rasterizer::DrawCommand drawCommand{};
+		drawCommand.mesh = Rasterizer::cube;
+		drawCommand.cullMode = Rasterizer::CullMode::Clockwise; // front-face culling
+		drawCommand.depth.mode = Rasterizer::DepthTestMode::Less;
+		drawCommand.transform = projection
+			* view
+			* Rasterizer::Matrix4x4f::Translate({ (float)i, 0.f, 0.f })
+			* model;
 
-
+		Rasterizer::Draw(framebuffer, viewport, drawCommand);
+	}
+	
 	// Write to the window's surface (screen)
 	SDL_Rect rect{ 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT };
 	SDL_BlitSurface(drawSurface, &rect, SDL_GetWindowSurface(window), &rect);

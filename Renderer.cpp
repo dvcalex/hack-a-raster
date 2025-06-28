@@ -4,8 +4,8 @@
 #include <algorithm>  
 #include <cmath>
 
-namespace Rasterizer  
-{  
+namespace Rasterizer
+{
 	namespace
 	{
 
@@ -151,141 +151,190 @@ namespace Rasterizer
 			return end;
 		}
 
+		bool DepthTestPassed(DepthTestMode mode,
+			std::uint32_t value,
+			std::uint32_t reference)
+		{
+			switch (mode)
+			{
+				case DepthTestMode::Always: return true;
+				case DepthTestMode::Never: return false;
+				case DepthTestMode::Less: return value < reference;
+				case DepthTestMode::LessEqual: return value <= reference;
+				case DepthTestMode::Greater: return value > reference;
+				case DepthTestMode::GreaterEqual: return value >= reference;
+				case DepthTestMode::Equal: return value == reference;
+				case DepthTestMode::NotEqual: return value != reference;
+			}
+
+			// Unreachable
+			return true;
+		}
 	}
 
 
-    // Sets each element in 'colorBuffer' to 'color' as a Color4UB.  
-    void Clear(const ColorBuffer& colorBuffer, const Vector4f& color)  
-    {  
-        std::fill_n(colorBuffer.pixels, WINDOW_WIDTH * WINDOW_HEIGHT, ToColor4UB(color));
-    }  
+	// Sets each element in 'colorBuffer' to 'color' as a Color4UB.  
+	void Clear(const ImageView<Color4UB>& colorBuffer, const Vector4f& color)
+	{
+		std::fill_n(colorBuffer.pixels, WINDOW_WIDTH * WINDOW_HEIGHT, ToColor4UB(color));
+	}
 
-    void Draw(const ColorBuffer& colorBuffer, 
-        const Viewport& viewport, 
-        const DrawCommand& command)
-    {
-        // For each triangle (set of 3 vertices/indices) in Vertex buffer
-        for (std::uint32_t vertIdx = 0; (vertIdx + 2) < command.mesh.count; vertIdx += 3)
-        {
-            // initialize indices to the raw vertices
-            std::uint32_t i0 = vertIdx + 0;
-            std::uint32_t i1 = vertIdx + 1;
-            std::uint32_t i2 = vertIdx + 2;
+	// Fills depthBuffer with some value
+	void Clear(const ImageView<std::uint32_t>& depthBuffer, std::uint32_t value)
+	{
+		auto ptr = depthBuffer.pixels;
+		auto size = WINDOW_WIDTH * WINDOW_HEIGHT;
+		std::fill(ptr, ptr + size, value);
+	}
 
-            // check for indices != nullptr
-            if (command.mesh.indices)
-            {
-                // assign i0, i1, i2 to proper indices (we are now using indexed rendering)
-                i0 = command.mesh.indices[i0];
-                i1 = command.mesh.indices[i1];
-                i2 = command.mesh.indices[i2];
-            }
+	void Draw(const Framebuffer& framebuffer,
+		const Viewport& viewport,
+		const DrawCommand& command)
+	{
+		// For each triangle (set of 3 vertices/indices) in Vertex buffer
+		for (std::uint32_t vertIdx = 0; (vertIdx + 2) < command.mesh.count; vertIdx += 3)
+		{
+			// initialize indices to the raw vertices
+			std::uint32_t i0 = vertIdx + 0;
+			std::uint32_t i1 = vertIdx + 1;
+			std::uint32_t i2 = vertIdx + 2;
 
-            // Fill just 3 vertices, but leave place for the clipping result
-            Vertex clippedVertices[12];
+			// check for indices != nullptr
+			if (command.mesh.indices)
+			{
+				// assign i0, i1, i2 to proper indices (we are now using indexed rendering)
+				i0 = command.mesh.indices[i0];
+				i1 = command.mesh.indices[i1];
+				i2 = command.mesh.indices[i2];
+			}
 
-            clippedVertices[0].pos = command.transform * AsPoint(command.mesh.vertices[i0]);
-            clippedVertices[1].pos = command.transform * AsPoint(command.mesh.vertices[i1]);
-            clippedVertices[2].pos = command.transform * AsPoint(command.mesh.vertices[i2]);
+			// Fill just 3 vertices, but leave place for the clipping result
+			Vertex clippedVertices[12];
 
-            clippedVertices[0].color = command.mesh.colors[i0];
-            clippedVertices[1].color = command.mesh.colors[i1];
-            clippedVertices[2].color = command.mesh.colors[i2];
+			clippedVertices[0].pos = command.transform * AsPoint(command.mesh.vertices[i0]);
+			clippedVertices[1].pos = command.transform * AsPoint(command.mesh.vertices[i1]);
+			clippedVertices[2].pos = command.transform * AsPoint(command.mesh.vertices[i2]);
 
-            // This is where actual clipping takes place
-            auto clippedVertices_end = clipTriangle(clippedVertices, clippedVertices + 3);
+			clippedVertices[0].color = command.mesh.colors[i0];
+			clippedVertices[1].color = command.mesh.colors[i1];
+			clippedVertices[2].color = command.mesh.colors[i2];
 
-            for (auto triangle_begin = clippedVertices; triangle_begin != clippedVertices_end; triangle_begin += 3)
-            {
-                auto v0 = triangle_begin[0];
-                auto v1 = triangle_begin[1];
-                auto v2 = triangle_begin[2];
+			// This is where actual clipping takes place
+			auto clippedVertices_end = clipTriangle(clippedVertices, clippedVertices + 3);
 
-                v0.pos = PerspectiveDivide(v0.pos);
-                v1.pos = PerspectiveDivide(v1.pos);
-                v2.pos = PerspectiveDivide(v2.pos);
+			for (auto triangle_begin = clippedVertices; triangle_begin != clippedVertices_end; triangle_begin += 3)
+			{
+				auto v0 = triangle_begin[0];
+				auto v1 = triangle_begin[1];
+				auto v2 = triangle_begin[2];
 
-                v0.pos = Apply(viewport, v0.pos);
-                v1.pos = Apply(viewport, v1.pos);
-                v2.pos = Apply(viewport, v2.pos);
+				v0.pos = PerspectiveDivide(v0.pos);
+				v1.pos = PerspectiveDivide(v1.pos);
+				v2.pos = PerspectiveDivide(v2.pos);
 
-                // Get determinate of [ v0v1 v0v2 ]
-                float det012 = Det2D(v1.pos - v0.pos, v2.pos - v0.pos);
+				v0.pos = Apply(viewport, v0.pos);
+				v1.pos = Apply(viewport, v1.pos);
+				v2.pos = Apply(viewport, v2.pos);
 
-                // Is it counterclockwise on screen?
-                bool const isCounterClockwise = det012 < 0.f;
+				// Get determinate of [ v0v1 v0v2 ]
+				float det012 = Det2D(v1.pos - v0.pos, v2.pos - v0.pos);
 
-                switch (command.cullMode)
-                {
-                case CullMode::None:
-                    break;
-                case CullMode::Clockwise:
-                    if (!isCounterClockwise)
-                        continue; // move to the next triangle
-                    break;
-                case CullMode::CounterClockwise:
-                    if (isCounterClockwise)
-                        continue; // move to the next triangle
-                    break;
-                }
+				// Is it counterclockwise on screen?
+				bool const isCounterClockwise = det012 < 0.f;
 
-                // This fixes messed up orientations
-                if (isCounterClockwise)
-                {
-                    std::swap(v1, v2);
-                    det012 = -det012;
-                }
+				switch (command.cullMode)
+				{
+				case CullMode::None:
+					break;
+				case CullMode::Clockwise:
+					if (!isCounterClockwise)
+						continue; // move to the next triangle
+					break;
+				case CullMode::CounterClockwise:
+					if (isCounterClockwise)
+						continue; // move to the next triangle
+					break;
+				}
 
-                // Get the bounding box of the triangle (so we don't operate on redundant pixel coordinates)
-                std::int32_t xmin = std::max<std::int32_t>(viewport.xmin, 0);
-                std::int32_t xmax = std::min<std::int32_t>(viewport.xmax, WINDOW_WIDTH) - 1;
-                std::int32_t ymin = std::max<std::int32_t>(viewport.ymin, 0);
-                std::int32_t ymax = std::min<std::int32_t>(viewport.ymax, WINDOW_HEIGHT) - 1;
+				// This fixes messed up orientations
+				if (isCounterClockwise)
+				{
+					std::swap(v1, v2);
+					det012 = -det012;
+				}
 
-                // Restrict bounding box to be inside of our canvas space
-                xmin = std::max<float>(xmin, std::min({ std::floor(v0.pos.x), std::floor(v1.pos.x), std::floor(v2.pos.x) }));
-                xmax = std::min<float>(xmax, std::max({ std::floor(v0.pos.x), std::floor(v1.pos.x), std::floor(v2.pos.x) }));
-                ymin = std::max<float>(ymin, std::min({ std::floor(v0.pos.y), std::floor(v1.pos.y), std::floor(v2.pos.y) }));
-                ymax = std::min<float>(ymax, std::max({ std::floor(v0.pos.y), std::floor(v1.pos.y), std::floor(v2.pos.y) }));
+				// Get the bounding box of the triangle (so we don't operate on redundant pixel coordinates)
+				std::int32_t xmin = std::max<std::int32_t>(viewport.xmin, 0);
+				std::int32_t xmax = std::min<std::int32_t>(viewport.xmax, WINDOW_WIDTH) - 1;
+				std::int32_t ymin = std::max<std::int32_t>(viewport.ymin, 0);
+				std::int32_t ymax = std::min<std::int32_t>(viewport.ymax, WINDOW_HEIGHT) - 1;
 
-                // For each pixel coordinate in our bounding box
-                for (std::int32_t y = ymin; y <= ymax; ++y)
-                {
-                    for (std::int32_t x = xmin; x <= xmax; ++x)
-                    {
-                        // Sample point for this pixel (+ 0.5f because we sample the middle)
-                        Vector4f p{ x + 0.5f, y + 0.5f, 0.f, 0.f };
+				// Restrict bounding box to be inside of our canvas space
+				xmin = std::max<float>(xmin, std::min({ std::floor(v0.pos.x), std::floor(v1.pos.x), std::floor(v2.pos.x) }));
+				xmax = std::min<float>(xmax, std::max({ std::floor(v0.pos.x), std::floor(v1.pos.x), std::floor(v2.pos.x) }));
+				ymin = std::max<float>(ymin, std::min({ std::floor(v0.pos.y), std::floor(v1.pos.y), std::floor(v2.pos.y) }));
+				ymax = std::min<float>(ymax, std::max({ std::floor(v0.pos.y), std::floor(v1.pos.y), std::floor(v2.pos.y) }));
 
-                        /*
-                        * Get if p is left or right of a given side of the triangle.
-                        *
-                        * Triangle v0, v1, v2 oriented clockwise (counterclockwise in regular
-                        * maths because Y is flipped in our case), so we check if p
-                        * is left of v0v1, v1v2, and v2v0.
-                        *
-                        * Det2D(A, B) is positive when the rotation from A to B is
-                        * clockwise. So in our case we check for this.
-                        */
-                        float det01p = Det2D(v1.pos - v0.pos, p - v0.pos);
-                        float det12p = Det2D(v2.pos - v1.pos, p - v1.pos);
-                        float det20p = Det2D(v0.pos - v2.pos, p - v2.pos);
+				// For each pixel coordinate in our bounding box
+				for (std::int32_t y = ymin; y <= ymax; ++y)
+				{
+					for (std::int32_t x = xmin; x <= xmax; ++x)
+					{
+						// Sample point for this pixel (+ 0.5f because we sample the middle)
+						Vector4f p{ x + 0.5f, y + 0.5f, 0.f, 0.f };
 
-                        // If sample point p is to the left of each side, color that pixel.                        
-                        if (det01p >= 0.f && det12p >= 0.f && det20p >= 0.f)
-                        {
-                            // Calculate barycentric coordinates
-                            float l0 = det12p / det012;
-                            float l1 = det20p / det012;
-                            float l2 = det01p / det012;
+						/*
+						* Get if p is left or right of a given side of the triangle.
+						*
+						* Triangle v0, v1, v2 oriented clockwise (counterclockwise in regular
+						* maths because Y is flipped in our case), so we check if p
+						* is left of v0v1, v1v2, and v2v0.
+						*
+						* Det2D(A, B) is positive when the rotation from A to B is
+						* clockwise. So in our case we check for this.
+						*/
+						float det01p = Det2D(v1.pos - v0.pos, p - v0.pos);
+						float det12p = Det2D(v2.pos - v1.pos, p - v1.pos);
+						float det20p = Det2D(v0.pos - v2.pos, p - v2.pos);
 
-                            colorBuffer.ColorAt(x, y) = ToColor4UB(l0 * v0.color + l1 * v1.color + l2 * v2.color);
-                        }
+						// If sample point p is to the left of each side, color that pixel.                        
+						if (det01p >= 0.f && det12p >= 0.f && det20p >= 0.f)
+						{
+							// Calculate barycentric coordinates (accounting for non-linear 
+							// interpolation due to perspective projection).
+							float l0 = det12p / det012 * v0.pos.w;
+							float l1 = det20p / det012 * v1.pos.w;
+							float l2 = det01p / det012 * v2.pos.w;
 
-                    }
-                }
-            }
+							float lsum = l0 + l1 + l2;
 
-            
-        }
-    }
+							l0 /= lsum;
+							l1 /= lsum;
+							l2 /= lsum;
+
+							// Handle depth test
+							if (framebuffer.depth) // check that depth buffer is allocated
+							{
+								float z = l0 * v0.pos.z + l1 * v1.pos.z + l2 * v2.pos.z;
+								std::uint32_t depth = (0.5f + 0.5f * z) * std::uint32_t(-1);
+
+								if (!DepthTestPassed(command.depth.mode, depth, framebuffer.depth.At(x, y)))
+									continue;
+
+								if (command.depth.write)
+									framebuffer.depth.At(x, y) = depth;
+							}
+
+							// final color
+							if (framebuffer.color)
+								framebuffer.color.At(x, y) = ToColor4UB(l0 * v0.color + l1 * v1.color + l2 * v2.color);
+						}
+
+					}
+				}
+			}
+
+
+		}
+	}
 }
