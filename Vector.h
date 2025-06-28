@@ -58,4 +58,9 @@ namespace Rasterizer
         return v;
     }
 
+    inline float Dot(const Vector4f& v0, const Vector4f& v1)
+    {
+        return v0.x * v1.x + v0.y * v1.y + v0.z * v1.z + v0.w * v1.w;
+    }
+
 }

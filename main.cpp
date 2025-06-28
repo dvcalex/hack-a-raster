@@ -148,17 +148,25 @@ SDL_AppResult SDL_AppIterate(void* appstate)
 		2, 1, 3, // triangle 2
 	};
 
-	Rasterizer::Matrix4x4f transform =
-		Rasterizer::Matrix4x4f::Perspective(0.01f, 10.f, M_PI / 3.f, WINDOW_WIDTH * 1.f / WINDOW_HEIGHT)
-		* Rasterizer::Matrix4x4f::Translate({ 0.f, 0.f, -5.f })
+	// Model transformation matrix
+	Rasterizer::Matrix4x4f model
+	{
+		Rasterizer::Matrix4x4f::Translate({0.f, 0.f, -4.f})
 		* Rasterizer::Matrix4x4f::RotateZX(elapsedTime)
-		* Rasterizer::Matrix4x4f::RotateXY(elapsedTime * 1.61f);
+		* Rasterizer::Matrix4x4f::RotateXY(elapsedTime * 1.61f)
+	};
+
+	// Projection transformation matrix
+	Rasterizer::Matrix4x4f projection
+	{
+		Rasterizer::Matrix4x4f::Perspective(4.f, 10.f, M_PI / 3.f, WINDOW_WIDTH * 1.f / WINDOW_HEIGHT)
+	};
 
 	// DrawCommand initialization
 	Rasterizer::DrawCommand drawCommand{};
 	drawCommand.mesh = Rasterizer::cube;
-	drawCommand.cullMode = Rasterizer::CullMode::Clockwise;
-	drawCommand.transform = transform;
+	drawCommand.cullMode = Rasterizer::CullMode::CounterClockwise; // front-face culling
+	drawCommand.transform = projection * model;
 
 	Rasterizer::Draw(colorBuffer, viewport, drawCommand);
 
