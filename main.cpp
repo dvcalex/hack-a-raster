@@ -109,6 +109,14 @@ SDL_AppResult SDL_AppIterate(void* appstate)
 {
 	// track time
 	auto thisTick{ myClock::now() };
+
+	if (!doRender)
+	{
+		lastTick = thisTick;
+		return SDL_APP_CONTINUE; // Carry on with the program.
+	}
+
+	// Handle frame rate count
 	float dt{ std::chrono::duration_cast<std::chrono::duration<float>>(
 		thisTick - lastTick).count() };
 	lastTick = thisTick;
