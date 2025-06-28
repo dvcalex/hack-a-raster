@@ -16,25 +16,39 @@ namespace Rasterizer
         const Viewport& viewport, 
         const DrawCommand& command)
     {
-        // For each triangle (set of 3 vertices) in vertex buffer
-        for (std::uint32_t vIdx = 0;
-            vIdx + 2 < command.mesh.vertexCount;
-            vIdx += 3)
+        // For each triangle (set of 3 vertices/indices) in vertex buffer
+        for (std::uint32_t vertIdx = 0;
+            vertIdx + 2 < command.mesh.count;
+            vertIdx += 3)
         {
+            // initialize indices to the raw vertices
+            std::uint32_t i0 = vertIdx + 0;
+            std::uint32_t i1 = vertIdx + 1;
+            std::uint32_t i2 = vertIdx + 2;
+
+            // check for indices != nullptr
+            if (command.mesh.indices)
+            {
+                // assign i0, i1, i2 to proper indices (we are now using indexed rendering)
+                i0 = command.mesh.indices[i0];
+                i1 = command.mesh.indices[i1];
+                i2 = command.mesh.indices[i2];
+            }
+
             // Vertices are group adjacently in threes to make up a triangle.
             // Get all three points in the triangle as homogenous coordinates.
-            auto v0 = command.transform * AsPoint(command.mesh.vertices[vIdx + 0]);
-            auto v1 = command.transform * AsPoint(command.mesh.vertices[vIdx + 1]);
-            auto v2 = command.transform * AsPoint(command.mesh.vertices[vIdx + 2]);
+            auto v0 = command.transform * AsPoint(command.mesh.vertices[i0]);
+            auto v1 = command.transform * AsPoint(command.mesh.vertices[i1]);
+            auto v2 = command.transform * AsPoint(command.mesh.vertices[i2]);
 
             v0 = Apply(viewport, v0);
             v1 = Apply(viewport, v1);
             v2 = Apply(viewport, v2);
 
             // Color vertex attributes
-            auto c0 = command.mesh.colors[vIdx + 0];
-            auto c1 = command.mesh.colors[vIdx + 1];
-            auto c2 = command.mesh.colors[vIdx + 2];
+            auto c0 = command.mesh.colors[i0];
+            auto c1 = command.mesh.colors[i1];
+            auto c2 = command.mesh.colors[i2];
 
             // Get determinate of [ v0v1 v0v2 ]
             float det012 = Det2D(v1 - v0, v2 - v0);

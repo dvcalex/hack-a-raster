@@ -127,25 +127,34 @@ SDL_AppResult SDL_AppIterate(void* appstate)
 	// Postions of vertices in NDC (Normalized Device Coordinates)
 	Vector3f positions[]
 	{
-		{ 0.f,   0.5f, 0.f},
 		{-0.5f, -0.5f, 0.f},
+		{-0.5f,  0.5f, 0.f},
 		{ 0.5f, -0.5f, 0.f},
+		{ 0.5f,  0.5f, 0.f},
 	};
 
 	Vector4f colors[]
 	{
-		{1.f, 0.f, 0.f, 1.f},
-		{0.f, 1.f, 0.f, 1.f},
-		{0.f, 0.f, 1.f, 1.f},
+		{1.f, 0.f, 0.f},
+		{0.f, 1.f, 0.f},
+		{0.f, 0.f, 1.f},
+		{1.f, 1.f, 1.f},
+	};
+
+	std::uint32_t indices[]
+	{
+		0, 1, 2, // triangle 1
+		2, 1, 3, // triangle 2
 	};
 
 	for (int i = 0; i < 100; ++i)
 	{
 		// Mesh initialization
 		Rasterizer::Mesh mesh{};
-		mesh.colors.pointer = colors;
 		mesh.vertices.pointer = positions;
-		mesh.vertexCount = 3;
+		mesh.colors.pointer = colors;
+		mesh.indices = indices;
+		mesh.count = 6; // represents indices count
 
 		// DrawCommand initialization
 		Rasterizer::DrawCommand drawCommand{};

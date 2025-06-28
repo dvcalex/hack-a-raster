@@ -13,6 +13,8 @@ namespace Rasterizer
     {
         Attribute<Vector3f> vertices = {};
         Attribute<Vector4f> colors = {};
-        std::uint32_t vertexCount = 0;
+        std::uint32_t const* indices = nullptr;
+        // Number of indices in our index array. If indices is null, count is the number of vertices.
+        std::uint32_t count = 0; 
     };
 }
