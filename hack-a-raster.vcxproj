@@ -129,13 +129,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Color.h" />
     <ClInclude Include="DrawCommand.h" />
     <ClInclude Include="Globals.h" />
+    <ClInclude Include="Matrix.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="Settings.h" />
-    <ClInclude Include="Types.h" />
-    <ClInclude Include="Vec3.h" />
     <ClInclude Include="Viewport.h" />
   </ItemGroup>
   <ItemGroup>
@@ -143,6 +143,7 @@
     <ClCompile Include="debug.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Renderer.cpp" />
+    <ClCompile Include="Vector.h" />
     <ClCompile Include="VertexAttribute.h" />
   </ItemGroup>
   <ItemGroup>

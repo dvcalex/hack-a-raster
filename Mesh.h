@@ -1,14 +1,11 @@
 #pragma once
 
-#include "Types.h"
+#include "Vector.h"
+#include "Color.h"
 #include "VertexAttribute.h"
 
 namespace Rasterizer
 {
-    using Types::Vector4f;
-    using Types::Vector3f;
-    using Types::Color4UB;
-
     struct Mesh
     {
         Attribute<Vector3f> vertices = {};

@@ -1,13 +1,11 @@
 #pragma once
 
-#include"Types.h"
+#include"Vector.h"
 
 #include <cstdint>
 
 namespace Rasterizer
 {
-    using Types::Vector4f;
-
     struct Viewport
     {
         std::int32_t xmin, ymin, xmax, ymax;

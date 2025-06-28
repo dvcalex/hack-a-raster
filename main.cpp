@@ -22,9 +22,6 @@
 #include <chrono>
 #include <iostream>
 
-using Rasterizer::Types::Color4UB;
-using Rasterizer::Types::Vector4f;
-using Rasterizer::Types::Vector3f;
 using myClock = std::chrono::high_resolution_clock;
 using Rasterizer::ColorBuffer;
 
@@ -33,10 +30,11 @@ static SDL_Window* window = nullptr;
 static SDL_Renderer* renderer = nullptr;
 static SDL_Surface* drawSurface = nullptr;
 
-static float mouse_x = 0;
-static float mouse_y = 0;
+static float mouse_x{ 0 };
+static float mouse_y{ 0 };
 
 static std::chrono::steady_clock::time_point lastTick;
+static float elapsedTime{ 0 };
 
 /* This function runs once at startup. */
 SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[])
@@ -105,10 +103,11 @@ SDL_AppResult SDL_AppIterate(void* appstate)
 #ifdef PROFILE_DELTATIME
 	std::cout << "dt : " << dt << std::endl;
 #endif
+	elapsedTime += dt;
 
 
 	// Get pointer to pixels (our buffer)
-	ColorBuffer colorBuffer{ (Color4UB*)drawSurface->pixels };
+	ColorBuffer colorBuffer{ (Rasterizer::Color4UB*)drawSurface->pixels };
 
 	// Setup our viewport
 	Rasterizer::Viewport viewport
@@ -122,10 +121,8 @@ SDL_AppResult SDL_AppIterate(void* appstate)
 	// Clear and set a color
 	Rasterizer::Clear(colorBuffer, { 0.8f, 0.9f, 1.f, 1.f });
 
-	// Do rendering...
-
 	// Postions of vertices in NDC (Normalized Device Coordinates)
-	Vector3f positions[]
+	Rasterizer::Vector3f positions[]
 	{
 		{-0.5f, -0.5f, 0.f},
 		{-0.5f,  0.5f, 0.f},
@@ -133,7 +130,7 @@ SDL_AppResult SDL_AppIterate(void* appstate)
 		{ 0.5f,  0.5f, 0.f},
 	};
 
-	Vector4f colors[]
+	Rasterizer::Vector4f colors[]
 	{
 		{1.f, 0.f, 0.f},
 		{0.f, 1.f, 0.f},
@@ -147,7 +144,9 @@ SDL_AppResult SDL_AppIterate(void* appstate)
 		2, 1, 3, // triangle 2
 	};
 
-	for (int i = 0; i < 100; ++i)
+	Rasterizer::Matrix4x4f transform = Rasterizer::Matrix4x4f::RotateZX(elapsedTime);
+
+	for (int i = 0; i < 1; ++i)
 	{
 		// Mesh initialization
 		Rasterizer::Mesh mesh{};
@@ -160,6 +159,7 @@ SDL_AppResult SDL_AppIterate(void* appstate)
 		Rasterizer::DrawCommand drawCommand{};
 		drawCommand.mesh = mesh;
 		drawCommand.cullMode = Rasterizer::CullMode::None;
+		drawCommand.transform = transform;
 
 		Rasterizer::Draw(colorBuffer, viewport, drawCommand);
 	}

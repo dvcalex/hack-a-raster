@@ -119,7 +119,7 @@ namespace Rasterizer
                         float l1 = det20p / det012;
                         float l2 = det01p / det012;
 
-                        colorBuffer.ColorAt(x, y) = Types::ToColor4UB(l0 * c0 + l1 * c1 + l2 * c2);
+                        colorBuffer.ColorAt(x, y) = ToColor4UB(l0 * c0 + l1 * c1 + l2 * c2);
                     }
 
                 }

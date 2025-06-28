@@ -1,14 +1,12 @@
 #pragma once
 
 #include"Globals.h"
-#include"Types.h"
+#include"Color.h"
 
 #include <cstdint>
 
 namespace Rasterizer
 {
-    using Types::Color4UB;
-
     // just a wrapper for our pointer Color4UB* pixels.
     struct ColorBuffer
     {
