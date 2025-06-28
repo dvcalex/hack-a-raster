@@ -93,50 +93,71 @@ SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event)
 /* This function runs once per frame, and is the heart of the program. */
 SDL_AppResult SDL_AppIterate(void* appstate)
 {
-	// handle frame rate count
-	auto thisTick = myClock::now();
-	float dt = std::chrono::duration_cast<std::chrono::duration<float>>(
-		thisTick - lastTick).count();
+	// Handle frame rate count
+	auto thisTick{ myClock::now() };
+	float dt{ std::chrono::duration_cast<std::chrono::duration<float>>(
+		thisTick - lastTick).count() };
 	lastTick = thisTick;
-#ifdef FPS
+#ifdef PROFILE_FPS
 	std::cout << "fps : " << (1.f / dt) << std::endl;
-#else
+#endif
+#ifdef PROFILE_DELTATIME
 	std::cout << "dt : " << dt << std::endl;
-#endif // FPS
+#endif
 
 
-	// get pointer to pixels (our buffer)
+	// Get pointer to pixels (our buffer)
 	ColorBuffer colorBuffer{ (Color4UB*)drawSurface->pixels };
 
-	// clear and set a color
+	// Clear and set a color
 	Rasterizer::Clear(colorBuffer, { 0.8f, 0.9f, 1.f, 1.f });
 
 
-	// do rendering
+	// Do rendering...
 
-	// basic triangle
-	Vector3f vertices[] =
+	// Basic triangle
+	Vector3f basicTriangle[]
 	{
-		{100.f, 100.f, 0.f},
-		{200.f, 100.f, 0.f},
-		{100.f, 200.f, 0.f},
+		{0.f, 0.f, 0.f},
+		{100.f, 0.f, 0.f},
+		{0.f, 100.f, 0.f},
 	};
 
-	Rasterizer::DrawCommand drawCommand{ {
-				vertices,				// vertex buffer
-				3,						// vertex count
-				{1.f, 0.f, 0.f, 1.f},	// mesh color
-			} };
+	for (int i = 0; i < 100; ++i)
+	{
+		Rasterizer::DrawCommand drawCommand
+		{
+			// Mesh
+			{
+				basicTriangle,				// Vertex buffer
+				3,						// Vertex count
+				{(i % 3) == 0, (i % 3) == 1, (i % 3) == 2, 1.f},	// Mesh color
+			},
+			// Cull mode
+			{
+				Rasterizer::CullMode::None
+			},
+			// Transform (defined by a Matrix4x4f)
+			{
+				// Matrix4x4f
+				{
+					1.f, 0.f, 0.f, mouse_x + 100.f * (i % 10),
+					0.f, 1.f, 0.f, mouse_y + 100.f * (i / 10),
+					0.f, 0.f, 1.f, 0.f,
+					0.f, 0.f, 0.f, 1.f,
+				}
+			}
+		};
 
-	Rasterizer::Draw(colorBuffer, drawCommand);
+		Rasterizer::Draw(colorBuffer, drawCommand);
+	}
 
-
-	// final step to write to the window's surface (screen)
+	// Write to the window's surface (screen)
 	SDL_Rect rect{ 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT };
 	SDL_BlitSurface(drawSurface, &rect, SDL_GetWindowSurface(window), &rect);
 	SDL_UpdateWindowSurface(window);
 
-	return SDL_APP_CONTINUE;  /* carry on with the program! */
+	return SDL_APP_CONTINUE; // Carry on with the program.
 }
 
 /* This function runs once at shutdown. */
@@ -145,4 +166,4 @@ void SDL_AppQuit(void* appstate, SDL_AppResult result)
 	/* SDL will clean up the window/renderer for us. */
 }
 
-#endif // not MY_DEBUG
+#endif // if not MY_DEBUG
