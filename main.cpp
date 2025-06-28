@@ -14,6 +14,7 @@
 
 #include"Renderer.h"
 #include"VertexAttribute.h"
+#include"Cube.h"
 
 #define SDL_MAIN_USE_CALLBACKS 1  /* use the callbacks instead of main() */
 #include <SDL3/SDL.h>
@@ -144,25 +145,20 @@ SDL_AppResult SDL_AppIterate(void* appstate)
 		2, 1, 3, // triangle 2
 	};
 
-	Rasterizer::Matrix4x4f transform = Rasterizer::Matrix4x4f::RotateZX(elapsedTime);
+	Rasterizer::Matrix4x4f transform =
+		Rasterizer::Matrix4x4f::Scale({ WINDOW_HEIGHT * 1.f / WINDOW_WIDTH, 1.f, 1.f })
+		* Rasterizer::Matrix4x4f::Scale(0.5f)
+		* Rasterizer::Matrix4x4f::RotateZX(elapsedTime)
+		* Rasterizer::Matrix4x4f::RotateXY(elapsedTime * 1.61f);
 
-	for (int i = 0; i < 1; ++i)
-	{
-		// Mesh initialization
-		Rasterizer::Mesh mesh{};
-		mesh.vertices.pointer = positions;
-		mesh.colors.pointer = colors;
-		mesh.indices = indices;
-		mesh.count = 6; // represents indices count
+	// DrawCommand initialization
+	Rasterizer::DrawCommand drawCommand{};
+	drawCommand.mesh = Rasterizer::cube;
+	drawCommand.cullMode = Rasterizer::CullMode::Clockwise;
+	drawCommand.transform = transform;
 
-		// DrawCommand initialization
-		Rasterizer::DrawCommand drawCommand{};
-		drawCommand.mesh = mesh;
-		drawCommand.cullMode = Rasterizer::CullMode::None;
-		drawCommand.transform = transform;
+	Rasterizer::Draw(colorBuffer, viewport, drawCommand);
 
-		Rasterizer::Draw(colorBuffer, viewport, drawCommand);
-	}
 
 	// Write to the window's surface (screen)
 	SDL_Rect rect{ 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT };
