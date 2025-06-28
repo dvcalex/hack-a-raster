@@ -12,6 +12,8 @@
 
 #ifndef MY_DEBUG
 
+#define _USE_MATH_DEFINES
+
 #include"Renderer.h"
 #include"VertexAttribute.h"
 #include"Cube.h"
@@ -22,6 +24,7 @@
 #include <algorithm>
 #include <chrono>
 #include <iostream>
+#include <math.h>
 
 using myClock = std::chrono::high_resolution_clock;
 using Rasterizer::ColorBuffer;
@@ -146,8 +149,8 @@ SDL_AppResult SDL_AppIterate(void* appstate)
 	};
 
 	Rasterizer::Matrix4x4f transform =
-		Rasterizer::Matrix4x4f::Scale({ WINDOW_HEIGHT * 1.f / WINDOW_WIDTH, 1.f, 1.f })
-		* Rasterizer::Matrix4x4f::Scale(0.5f)
+		Rasterizer::Matrix4x4f::Perspective(0.01f, 10.f, M_PI / 3.f, WINDOW_WIDTH * 1.f / WINDOW_HEIGHT)
+		* Rasterizer::Matrix4x4f::Translate({ 0.f, 0.f, -5.f })
 		* Rasterizer::Matrix4x4f::RotateZX(elapsedTime)
 		* Rasterizer::Matrix4x4f::RotateXY(elapsedTime * 1.61f);
 

@@ -41,6 +41,10 @@ namespace Rasterizer
             auto v1 = command.transform * AsPoint(command.mesh.vertices[i1]);
             auto v2 = command.transform * AsPoint(command.mesh.vertices[i2]);
 
+            v0 = PerspectiveDivide(v0);
+            v1 = PerspectiveDivide(v1);
+            v2 = PerspectiveDivide(v2);
+
             v0 = Apply(viewport, v0);
             v1 = Apply(viewport, v1);
             v2 = Apply(viewport, v2);
