@@ -107,16 +107,8 @@ SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event)
 /* This function runs once per frame, and is the heart of the program. */
 SDL_AppResult SDL_AppIterate(void* appstate)
 {
-	// track time
+	// track time and delta time
 	auto thisTick{ myClock::now() };
-
-	if (!doRender)
-	{
-		lastTick = thisTick;
-		return SDL_APP_CONTINUE; // Carry on with the program.
-	}
-
-	// Handle frame rate count
 	float dt{ std::chrono::duration_cast<std::chrono::duration<float>>(
 		thisTick - lastTick).count() };
 	lastTick = thisTick;
