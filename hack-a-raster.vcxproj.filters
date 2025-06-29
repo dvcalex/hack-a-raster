@@ -57,6 +57,9 @@
     <ClInclude Include="SuperRealisticCow.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="AntiAliasing.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="debug.cpp">
@@ -94,9 +97,6 @@
     </ClCompile>
     <ClCompile Include="SuperRealisticCow.cpp">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="OBJLoader.h">
-      <Filter>Header Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

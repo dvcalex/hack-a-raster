@@ -86,9 +86,9 @@ namespace Rasterizer
 
 		// Base Face (using V12, V13, V14, V15 from pyramidPositions)
 		// First triangle: Back-Left, Front-Right, Back-Right (V12, V14, V13)
-		12, 14, 13,
+		12, 13, 14,
 		// Second triangle: Back-Left, Front-Left, Front-Right (V12, V15, V14)
-		12, 15, 14,
+		12, 14, 15,
 	};
 
 	// Definition of the Mesh object for the pyramid

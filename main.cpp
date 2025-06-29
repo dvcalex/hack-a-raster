@@ -35,7 +35,7 @@
 using myClock = std::chrono::high_resolution_clock;
 using Rasterizer::ImageView;
 
-static bool doRender{ false };
+static bool doRender{ true };
 
 /* We will use this renderer to draw into this window every frame. */
 static SDL_Window* window = nullptr;
@@ -94,14 +94,14 @@ SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event)
 		mouse_x = event->motion.x;
 		mouse_y = event->motion.y;
 		break;
-	case SDL_EVENT_MOUSE_BUTTON_DOWN:
-		//std::cout << "mouse down" << std::endl;
-		doRender = true;
-		break;
-	case SDL_EVENT_MOUSE_BUTTON_UP:
-		//std::cout << "mouse up" << std::endl;
-		doRender = false;
-		break;
+	//case SDL_EVENT_MOUSE_BUTTON_DOWN:
+	//	//std::cout << "mouse down" << std::endl;
+	//	doRender = true;
+	//	break;
+	//case SDL_EVENT_MOUSE_BUTTON_UP:
+	//	//std::cout << "mouse up" << std::endl;
+	//	doRender = false;
+	//	break;
 	}
 
 
@@ -185,7 +185,7 @@ SDL_AppResult SDL_AppIterate(void* appstate)
 	{
 		Rasterizer::Matrix4x4f::Scale(1.f)
 		* Rasterizer::Matrix4x4f::RotateZX(elapsedTime)
-		* Rasterizer::Matrix4x4f::RotateXY(elapsedTime * 1.61f)
+		* Rasterizer::Matrix4x4f::RotateXY(elapsedTime)
 	};
 
 	// Projection transformation matrix
@@ -197,20 +197,20 @@ SDL_AppResult SDL_AppIterate(void* appstate)
 	// View transformation matrix
 	Rasterizer::Matrix4x4f view
 	{
-		Rasterizer::Matrix4x4f::Translate({ 0.f, 0.f, -5.f })
+		Rasterizer::Matrix4x4f::Translate({ 0.f, 0.f, -6.f })
 	};
 
 	for (int i = 0; i <= 0; ++i)
 	{
-		// DrawCommand initialization
+		// Draw Command initialization
 		Rasterizer::DrawCommand drawCommand{};
 		drawCommand.mesh = Rasterizer::superRealisticCow;
-		drawCommand.cullMode = Rasterizer::CullMode::None; // front-face culling
+		drawCommand.cullMode = Rasterizer::CullMode::None;
 		drawCommand.depth.mode = Rasterizer::DepthTestMode::Less;
 		drawCommand.transform = projection
 			* view
-			* Rasterizer::Matrix4x4f::Translate({ (float)i, 0.f, 0.f })
-			* model;
+			* Rasterizer::Matrix4x4f::Translate({ (float)i, (float)i, 0.f })
+			* model; 
 
 		Rasterizer::Draw(framebuffer, viewport, drawCommand);
 	}

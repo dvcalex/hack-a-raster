@@ -129,6 +129,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="AntiAliasing.h" />
     <ClInclude Include="Color.h" />
     <ClInclude Include="Cow.h" />
     <ClInclude Include="Cube.h" />
@@ -152,7 +153,6 @@
     <ClCompile Include="Cube.cpp" />
     <ClCompile Include="debug.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="OBJLoader.h" />
     <ClCompile Include="Pyramid.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="SuperRealisticCow.cpp" />
